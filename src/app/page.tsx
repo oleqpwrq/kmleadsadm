@@ -1,10 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import Header from '@/components/Header';
 import AnimatedSection from '@/components/AnimatedSection';
 import { MessageOutlined, TeamOutlined, BarChartOutlined, SafetyOutlined } from '@ant-design/icons';
+import SubscriptionForm from '@/components/SubscriptionForm';
 
 export default function Home() {
+  const [isFormVisible, setIsFormVisible] = useState(false);
+
+  const handleSubmit = async (values: any) => {
+    try {
+      // Здесь будет логика отправки формы
+      console.log('Form values:', values);
+    } catch (error) {
+      console.error('Произошла ошибка при отправке заявки', error);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-background relative overflow-hidden">
       {/* Статичные элементы фона */}
@@ -44,7 +57,10 @@ export default function Home() {
               <p className="text-xl text-text/80 mb-8 max-w-3xl mx-auto">
                 Автоматизируйте сбор и анализ данных из Telegram групп с помощью нашего мощного инструмента
               </p>
-              <button className="bg-primary text-text px-8 py-3 rounded-lg text-lg font-medium hover:opacity-90 transition-all duration-300">
+              <button 
+                className="bg-primary text-text px-8 py-3 rounded-lg text-lg font-medium hover:opacity-90 transition-all duration-300"
+                onClick={() => setIsFormVisible(true)}
+              >
                 Начать бесплатно
               </button>
             </div>
@@ -160,6 +176,12 @@ export default function Home() {
           </AnimatedSection>
         </div>
       </section>
+
+      <SubscriptionForm
+        isVisible={isFormVisible}
+        onClose={() => setIsFormVisible(false)}
+        onSubmit={handleSubmit}
+      />
     </main>
   );
 } 

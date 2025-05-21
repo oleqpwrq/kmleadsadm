@@ -1,24 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, Button, Form, Input, Checkbox, message } from 'antd';
+import { Card, Button } from 'antd';
 import Header from '@/components/Header';
 import { mockTariffs } from '@/data/mockData';
+import SubscriptionForm from '@/components/SubscriptionForm';
 
 export default function TariffsPage() {
-  const [form] = Form.useForm();
-  const [showTelegramField, setShowTelegramField] = useState(false);
   const [selectedTariff, setSelectedTariff] = useState<string | null>(null);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+
+  const handleTariffSelect = (tariff: string) => {
+    setSelectedTariff(tariff);
+    setIsFormVisible(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormVisible(false);
+    setSelectedTariff(null);
+  };
 
   const handleSubmit = async (values: any) => {
     try {
       // Здесь будет логика отправки формы
       console.log('Form values:', values);
-      message.success('Ваша заявка успешно отправлена!');
-      form.resetFields();
-      setSelectedTariff(null);
     } catch (error) {
-      message.error('Произошла ошибка при отправке заявки');
+      console.error('Произошла ошибка при отправке заявки', error);
     }
   };
 
@@ -63,7 +70,7 @@ export default function TariffsPage() {
                   <div>
                     <Button
                       type="primary"
-                      onClick={() => setSelectedTariff(tariff.id)}
+                      onClick={() => handleTariffSelect(tariff.id)}
                       className="w-full bg-[#EF1670] border-[#EF1670] hover:bg-[#d11464] hover:border-[#d11464]"
                     >
                       Получить предложение
@@ -74,57 +81,11 @@ export default function TariffsPage() {
             ))}
           </div>
 
-          {selectedTariff && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-              <Card className="w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-6">Оставить заявку</h2>
-                
-                <Form
-                  form={form}
-                  layout="vertical"
-                  onFinish={handleSubmit}
-                >
-                  <Form.Item
-                    name="name"
-                    label="Ваше имя"
-                    rules={[{ required: true, message: 'Пожалуйста, введите ваше имя' }]}
-                  >
-                    <Input placeholder="Введите ваше имя" />
-                  </Form.Item>
-
-                  <Form.Item
-                    name="phone"
-                    label="Номер телефона"
-                    rules={[{ required: true, message: 'Пожалуйста, введите номер телефона' }]}
-                  >
-                    <Input placeholder="+7 (___) ___-__-__" />
-                  </Form.Item>
-
-                  <Form.Item name="useTelegram" valuePropName="checked">
-                    <Checkbox onChange={(e) => setShowTelegramField(e.target.checked)}>
-                      Напишите мне в Telegram
-                    </Checkbox>
-                  </Form.Item>
-
-                  {showTelegramField && (
-                    <Form.Item
-                      name="telegramUsername"
-                      label="Username Telegram"
-                      rules={[{ required: true, message: 'Пожалуйста, введите username' }]}
-                    >
-                      <Input placeholder="@username" />
-                    </Form.Item>
-                  )}
-
-                  <Form.Item>
-                    <Button type="primary" htmlType="submit" className="w-full">
-                      Отправить заявку
-                    </Button>
-                  </Form.Item>
-                </Form>
-              </Card>
-            </div>
-          )}
+          <SubscriptionForm
+            isVisible={isFormVisible}
+            onClose={handleCloseForm}
+            onSubmit={handleSubmit}
+          />
         </div>
       </main>
 
