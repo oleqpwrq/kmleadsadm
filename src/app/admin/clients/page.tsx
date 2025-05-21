@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { Table, Tag, Button, Space } from 'antd';
-import { EyeOutlined, EditOutlined } from '@ant-design/icons';
+import { Table, Tag, Button, Space, Popconfirm, message } from 'antd';
+import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 interface Client {
   id: number;
@@ -17,14 +17,40 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Получаем пользователей из localStorage
+  // Функция для загрузки клиентов
+  const loadClients = () => {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
-    // Фильтруем админа из списка
     const filteredUsers = users.filter((user: any) => user.email !== 'admin');
     setClients(filteredUsers);
     setLoading(false);
+  };
+
+  useEffect(() => {
+    loadClients();
   }, []);
+
+  // Функция для удаления клиента
+  const handleDelete = (id: number) => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const updatedUsers = users.filter((user: any) => user.id !== id);
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
+    loadClients();
+    message.success('Клиент успешно удален');
+  };
+
+  // Функция для изменения статуса
+  const handleStatusChange = (id: number, newStatus: string) => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const updatedUsers = users.map((user: any) => {
+      if (user.id === id) {
+        return { ...user, status: newStatus };
+      }
+      return user;
+    });
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
+    loadClients();
+    message.success('Статус успешно обновлен');
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -32,6 +58,8 @@ export default function ClientsPage() {
         return 'green';
       case 'Неактивен':
         return 'red';
+      case 'После регистрации':
+        return 'blue';
       default:
         return 'default';
     }
@@ -71,8 +99,18 @@ export default function ClientsPage() {
       title: 'Статус',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => (
-        <Tag color={getStatusColor(status)}>{status}</Tag>
+      sorter: (a: Client, b: Client) => a.status.localeCompare(b.status),
+      render: (status: string, record: Client) => (
+        <select
+          value={status}
+          onChange={(e) => handleStatusChange(record.id, e.target.value)}
+          className="border rounded px-2 py-1"
+          style={{ backgroundColor: 'transparent' }}
+        >
+          <option value="После регистрации">После регистрации</option>
+          <option value="Активен">Активен</option>
+          <option value="Неактивен">Неактивен</option>
+        </select>
       ),
     },
     {
@@ -82,6 +120,15 @@ export default function ClientsPage() {
         <Space>
           <Button icon={<EyeOutlined />} onClick={() => console.log('Просмотр', record)} />
           <Button icon={<EditOutlined />} onClick={() => console.log('Редактирование', record)} />
+          <Popconfirm
+            title="Удалить клиента?"
+            description="Это действие нельзя будет отменить"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Да"
+            cancelText="Нет"
+          >
+            <Button danger icon={<DeleteOutlined />} />
+          </Popconfirm>
         </Space>
       ),
     },

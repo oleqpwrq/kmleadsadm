@@ -68,7 +68,7 @@ export default function LoginPage() {
         email: values.email,
         password: values.password,
         plan: 'не активирован',
-        status: 'Неактивно'
+        status: 'После регистрации'
       };
 
       // Добавляем пользователя в список
