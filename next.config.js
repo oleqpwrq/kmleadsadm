@@ -4,7 +4,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: '/kmleadsadm',
+  basePath: process.env.NODE_ENV === 'production' ? '/kmleadsadm' : '',
+  trailingSlash: true,
 }
 
 module.exports = nextConfig 
