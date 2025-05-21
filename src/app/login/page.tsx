@@ -1,86 +1,111 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, Input, Button, Checkbox, message } from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import Header from '@/components/Header';
 
-export default function Login() {
+export default function LoginPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      // Проверяем учетные данные
+      if (email === 'admin' && password === 'admin') {
+        // Админ
+        router.push('/admin');
+      } else if (email === 'qwerty' && password === 'qwerty') {
+        // Обычный пользователь
+        router.push('/dashboard');
+      } else {
+        setError('Неверный логин или пароль');
+      }
+    } catch (err) {
+      setError('Произошла ошибка при входе');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-primary">
-              Вход в личный кабинет
-            </h2>
-            <p className="mt-2 text-center text-sm text-text">
-              Или{' '}
-              <a href="#" className="font-medium text-primary hover:text-primary/80">
-                зарегистрируйтесь, если у вас еще нет аккаунта
-              </a>
-            </p>
-          </div>
-          <form className="mt-8 space-y-6" action="#" method="POST">
-            <div className="space-y-4 rounded-md shadow-sm">
+      <main className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="p-8 bg-background/50 backdrop-blur-sm rounded-xl border border-primary/10 shadow-lg">
+            <h1 className="text-2xl font-bold text-text text-center mb-8">Вход в систему</h1>
+            
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+                {error}
+              </div>
+            )}
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="email" className="sr-only">
-                  Email
+                <label className="block text-sm font-medium text-text mb-2">
+                  Логин
                 </label>
-                <input
-                  id="email"
+                <Input
                   name="email"
-                  type="email"
-                  autoComplete="email"
+                  type="text"
                   required
-                  className="relative block w-full rounded-md border-0 py-3 px-4 text-text bg-background/50 ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
-                  placeholder="Email"
+                  prefix={<UserOutlined />}
+                  placeholder="Введите логин"
+                  className="w-full bg-white border-primary/20 text-text focus:border-primary"
                 />
               </div>
+
               <div>
-                <label htmlFor="password" className="sr-only">
+                <label className="block text-sm font-medium text-text mb-2">
                   Пароль
                 </label>
-                <input
-                  id="password"
+                <Input.Password
                   name="password"
-                  type="password"
-                  autoComplete="current-password"
                   required
-                  className="relative block w-full rounded-md border-0 py-3 px-4 text-text bg-background/50 ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
-                  placeholder="Пароль"
+                  prefix={<LockOutlined />}
+                  placeholder="Введите пароль"
+                  className="w-full bg-white border-primary/20 text-text focus:border-primary"
                 />
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-gray-700 bg-background/50 text-primary focus:ring-primary"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-text">
-                  Запомнить меня
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-primary hover:text-primary/80">
+              <div className="flex items-center justify-between">
+                <Checkbox className="text-text">Запомнить меня</Checkbox>
+                <a href="#" className="text-sm text-primary hover:text-primary/80">
                   Забыли пароль?
                 </a>
               </div>
-            </div>
 
-            <div>
-              <button
-                type="submit"
-                className="group relative flex w-full justify-center rounded-md bg-primary px-3 py-3 text-sm font-semibold text-text hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all duration-300"
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                className="w-full bg-primary hover:bg-primary/90 text-text"
               >
                 Войти
-              </button>
+              </Button>
+            </form>
+
+            <div className="mt-8 text-center text-sm text-text/60">
+              <p>Для демонстрации используйте:</p>
+              <p className="mt-2">Админ: admin / admin</p>
+              <p>Пользователь: qwerty / qwerty</p>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 } 
