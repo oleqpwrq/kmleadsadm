@@ -13,6 +13,24 @@ export default function Home() {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
       </div>
 
+      {/* Левая фигура */}
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1/3 h-full pointer-events-none">
+        <img
+          src="/left-shape.png"
+          alt="Left shape"
+          className="w-full h-full object-contain opacity-50 blur-sm"
+        />
+      </div>
+
+      {/* Правая фигура */}
+      <div className="absolute right-0 top-1/3 -translate-y-1/2 w-1/3 h-full pointer-events-none">
+        <img
+          src="/right-shape.png"
+          alt="Right shape"
+          className="w-full h-full object-contain opacity-50 blur-sm"
+        />
+      </div>
+
       <Header />
       
       {/* Hero секция */}
