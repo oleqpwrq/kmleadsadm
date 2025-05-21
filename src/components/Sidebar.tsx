@@ -6,6 +6,7 @@ import {
   HomeOutlined,
   TeamOutlined,
   SettingOutlined,
+  MessageOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
 import Link from 'next/link';
@@ -23,6 +24,7 @@ export default function Sidebar() {
   const adminMenuItems = [
     { key: 'dashboard', label: 'Статистика', icon: <HomeOutlined />, path: '/admin' },
     { key: 'clients', label: 'Клиенты', icon: <TeamOutlined />, path: '/admin/clients' },
+    { key: 'chats', label: 'Чаты', icon: <MessageOutlined />, path: '/admin/chats' },
     { key: 'management', label: 'Управление', icon: <SettingOutlined />, path: '/admin/management' },
   ];
 
