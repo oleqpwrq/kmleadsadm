@@ -1,40 +1,104 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, Input, Button, Checkbox, message } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { Form, Input, Button, message } from 'antd';
+import { UserOutlined, LockOutlined, MailOutlined, SendOutlined } from '@ant-design/icons';
 import Header from '@/components/Header';
+
+interface User {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  plan: string;
+  status: string;
+}
 
 export default function LoginPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [form] = Form.useForm();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  // Инициализация localStorage при первом рендере
+  useEffect(() => {
+    if (!localStorage.getItem('users')) {
+      // Создаем начальных пользователей
+      const initialUsers: User[] = [
+        {
+          id: 1,
+          name: 'Admin',
+          username: '@admin',
+          email: 'admin',
+          password: 'admin',
+          plan: 'Админ',
+          status: 'Активен'
+        },
+        {
+          id: 2,
+          name: 'User',
+          username: '@user',
+          email: 'qwerty',
+          password: 'qwerty',
+          plan: 'Базовый',
+          status: 'Активен'
+        }
+      ];
+      localStorage.setItem('users', JSON.stringify(initialUsers));
+    }
+  }, []);
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
-    try {
-      // Проверяем учетные данные
-      if (email === 'admin' && password === 'admin') {
-        // Админ
-        router.push('/admin');
-      } else if (email === 'qwerty' && password === 'qwerty') {
-        // Обычный пользователь
-        router.push('/dashboard');
-      } else {
-        setError('Неверный логин или пароль');
+  const handleSubmit = (values: any) => {
+    if (isRegistering) {
+      // Получаем существующих пользователей
+      const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');
+      
+      // Проверяем, не существует ли уже пользователь с таким email
+      if (users.some(user => user.email === values.email)) {
+        message.error('Пользователь с таким email уже существует');
+        return;
       }
-    } catch (err) {
-      setError('Произошла ошибка при входе');
-    } finally {
-      setLoading(false);
+
+      // Создаем нового пользователя
+      const newUser: User = {
+        id: Date.now(),
+        name: values.name,
+        username: values.telegramUsername,
+        email: values.email,
+        password: values.password,
+        plan: 'не активирован',
+        status: 'Неактивно'
+      };
+
+      // Добавляем пользователя в список
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+
+      message.success('Регистрация успешна!');
+      setIsRegistering(false);
+      form.resetFields();
+    } else {
+      // Получаем пользователей
+      const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');
+      
+      // Ищем пользователя с введенными данными
+      const user = users.find(
+        u => u.email === values.email && u.password === values.password
+      );
+
+      if (user) {
+        // Сохраняем информацию о текущем пользователе
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        
+        if (user.email === 'admin') {
+          router.push('/admin');
+        } else {
+          router.push('/dashboard');
+        }
+      } else {
+        message.error('Неверный email или пароль');
+      }
     }
   };
 
@@ -45,58 +109,68 @@ export default function LoginPage() {
       <main className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <div className="p-8 bg-background/50 backdrop-blur-sm rounded-xl border border-primary/10 shadow-lg">
-            <h1 className="text-2xl font-bold text-text text-center mb-8">Вход в систему</h1>
+            <h1 className="text-2xl font-bold text-text text-center mb-8">
+              {isRegistering ? 'Регистрация' : 'Вход'}
+            </h1>
             
-            {error && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
-                {error}
-              </div>
-            )}
-            
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-text mb-2">
-                  Логин
-                </label>
-                <Input
-                  name="email"
-                  type="text"
-                  required
-                  prefix={<UserOutlined />}
-                  placeholder="Введите логин"
-                  className="w-full bg-white border-primary/20 text-text focus:border-primary"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-text mb-2">
-                  Пароль
-                </label>
-                <Input.Password
-                  name="password"
-                  required
-                  prefix={<LockOutlined />}
-                  placeholder="Введите пароль"
-                  className="w-full bg-white border-primary/20 text-text focus:border-primary"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Checkbox className="text-text">Запомнить меня</Checkbox>
-                <a href="#" className="text-sm text-primary hover:text-primary/80">
-                  Забыли пароль?
-                </a>
-              </div>
-
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-                className="w-full bg-primary hover:bg-primary/90 text-text"
+            <Form form={form} onFinish={handleSubmit} layout="vertical">
+              {isRegistering && (
+                <>
+                  <Form.Item
+                    name="telegramUsername"
+                    rules={[{ required: true, message: 'Введите юзернейм в телеграм' }]}
+                  >
+                    <Input prefix={<SendOutlined />} placeholder="Юзернейм в телеграм" />
+                  </Form.Item>
+                  <Form.Item
+                    name="name"
+                    rules={[{ required: true, message: 'Введите имя' }]}
+                  >
+                    <Input prefix={<UserOutlined />} placeholder="Имя" />
+                  </Form.Item>
+                </>
+              )}
+              <Form.Item
+                name="email"
+                rules={[{ required: true, message: 'Введите email' }]}
               >
-                Войти
-              </Button>
-            </form>
+                <Input prefix={<MailOutlined />} placeholder="Email" />
+              </Form.Item>
+              <Form.Item
+                name="password"
+                rules={[{ required: true, message: 'Введите пароль' }]}
+              >
+                <Input.Password prefix={<LockOutlined />} placeholder="Пароль" />
+              </Form.Item>
+              {isRegistering && (
+                <Form.Item
+                  name="confirmPassword"
+                  rules={[
+                    { required: true, message: 'Подтвердите пароль' },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue('password') === value) {
+                          return Promise.resolve();
+                        }
+                        return Promise.reject(new Error('Пароли не совпадают'));
+                      },
+                    }),
+                  ]}
+                >
+                  <Input.Password prefix={<LockOutlined />} placeholder="Подтвердите пароль" />
+                </Form.Item>
+              )}
+              <Form.Item>
+                <Button type="primary" htmlType="submit" block>
+                  {isRegistering ? 'Зарегистрироваться' : 'Войти'}
+                </Button>
+              </Form.Item>
+              <div className="text-center">
+                <Button type="link" onClick={() => setIsRegistering(!isRegistering)}>
+                  {isRegistering ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
+                </Button>
+              </div>
+            </Form>
 
             <div className="mt-8 text-center text-sm text-text/60">
               <p>Для демонстрации используйте:</p>
