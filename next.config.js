@@ -4,8 +4,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: '/kmleadsadm',
-  assetPrefix: '/kmleadsadm/',
+  basePath: process.env.NODE_ENV === 'production' ? '/kmleadsadm' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/kmleadsadm/' : '',
   trailingSlash: true,
 }
 
