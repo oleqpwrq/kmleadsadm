@@ -66,7 +66,7 @@ export default function TariffPage() {
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{tariff.name}</h3>
                     <div className="text-2xl font-bold text-primary mb-1">
-                      {tariff.price.toLocaleString()} ₽
+                      {tariff.price.toLocaleString('ru-RU')} ₽
                       <span className="text-sm text-gray-500 font-normal">/мес</span>
                     </div>
                   </div>

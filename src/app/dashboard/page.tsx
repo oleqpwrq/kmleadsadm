@@ -63,28 +63,28 @@ export default function Dashboard() {
             <Card>
               <Statistic 
                 title="Входящих лидов сегодня"
-                value={userData.stats.todayLeads}
+                value={userData.stats.todayLeads.toLocaleString('ru-RU')}
                 prefix={<UserOutlined />}
               />
             </Card>
             <Card>
               <Statistic 
                 title="Входящих лидов за неделю"
-                value={userData.stats.weekLeads}
+                value={userData.stats.weekLeads.toLocaleString('ru-RU')}
                 prefix={<TeamOutlined />}
               />
             </Card>
             <Card>
               <Statistic 
                 title="Прошли по ключевым словам"
-                value={userData.stats.keywordMatches}
+                value={userData.stats.keywordMatches.toLocaleString('ru-RU')}
                 prefix={<MessageOutlined />}
               />
             </Card>
             <Card>
               <Statistic 
                 title="Прошли по нейроанализу"
-                value={userData.stats.neuralAnalysis}
+                value={userData.stats.neuralAnalysis.toLocaleString('ru-RU')}
                 prefix={<MailOutlined />}
               />
             </Card>
@@ -96,21 +96,21 @@ export default function Dashboard() {
               <Card>
                 <Statistic 
                   title="Ответы в чате"
-                  value={userData.stats.chatResponses}
+                  value={userData.stats.chatResponses ? userData.stats.chatResponses.toLocaleString('ru-RU') : '0'}
                   prefix={<CommentOutlined />}
                 />
               </Card>
               <Card>
                 <Statistic 
                   title="Ответы в личных сообщениях"
-                  value={userData.stats.privateMessages}
+                  value={userData.stats.privateMessages ? userData.stats.privateMessages.toLocaleString('ru-RU') : '0'}
                   prefix={<MailOutlined />}
                 />
               </Card>
               <Card>
                 <Statistic 
                   title="Диалогов начато"
-                  value={userData.stats.startedDialogs}
+                  value={userData.stats.startedDialogs ? userData.stats.startedDialogs.toLocaleString('ru-RU') : '0'}
                   prefix={<MessageOutlined />}
                 />
               </Card>

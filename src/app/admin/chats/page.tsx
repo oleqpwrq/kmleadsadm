@@ -154,7 +154,7 @@ export default function ChatsPage() {
               <div className="mb-6">
                 <Statistic 
                   title="Чатов всего" 
-                  value={totalChats}
+                  value={totalChats.toLocaleString('ru-RU')}
                   className="text-center"
                 />
               </div>

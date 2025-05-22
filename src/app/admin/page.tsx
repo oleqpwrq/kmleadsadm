@@ -125,25 +125,25 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <Statistic
                   title="Пропущено"
-                  value={processingStats.skipped}
+                  value={processingStats.skipped.toLocaleString('ru-RU')}
                   prefix={<CloseCircleOutlined />}
                   valueStyle={{ color: COLORS[0] }}
                 />
                 <Statistic
                   title="Завершено"
-                  value={processingStats.completed}
+                  value={processingStats.completed.toLocaleString('ru-RU')}
                   prefix={<CheckCircleOutlined />}
                   valueStyle={{ color: COLORS[1] }}
                 />
                 <Statistic
                   title="Ошибка"
-                  value={processingStats.error}
+                  value={processingStats.error.toLocaleString('ru-RU')}
                   prefix={<ExclamationCircleOutlined />}
                   valueStyle={{ color: COLORS[2] }}
                 />
                 <Statistic
                   title="В процессе"
-                  value={processingStats.inProgress}
+                  value={processingStats.inProgress.toLocaleString('ru-RU')}
                   prefix={<ClockCircleOutlined />}
                   valueStyle={{ color: COLORS[3] }}
                 />
@@ -176,25 +176,25 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <Statistic
                   title="Нет продавца"
-                  value={validationStats.noSeller}
+                  value={validationStats.noSeller.toLocaleString('ru-RU')}
                   prefix={<UserOutlined />}
                   valueStyle={{ color: COLORS[0] }}
                 />
                 <Statistic
                   title="Категория минус"
-                  value={validationStats.categoryMinus}
+                  value={validationStats.categoryMinus.toLocaleString('ru-RU')}
                   prefix={<TeamOutlined />}
                   valueStyle={{ color: COLORS[1] }}
                 />
                 <Statistic
                   title="Дубликат"
-                  value={validationStats.duplicate}
+                  value={validationStats.duplicate.toLocaleString('ru-RU')}
                   prefix={<MessageOutlined />}
                   valueStyle={{ color: COLORS[2] }}
                 />
                 <Statistic
                   title="Прошло"
-                  value={validationStats.passed}
+                  value={validationStats.passed.toLocaleString('ru-RU')}
                   prefix={<MailOutlined />}
                   valueStyle={{ color: COLORS[3] }}
                 />
@@ -227,13 +227,13 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <Statistic
                   title="Отправлено"
-                  value={responseStats.sent}
+                  value={responseStats.sent.toLocaleString('ru-RU')}
                   prefix={<CheckCircleOutlined />}
                   valueStyle={{ color: COLORS[0] }}
                 />
                 <Statistic
                   title="Не отправлено"
-                  value={responseStats.notSent}
+                  value={responseStats.notSent.toLocaleString('ru-RU')}
                   prefix={<CloseCircleOutlined />}
                   valueStyle={{ color: COLORS[1] }}
                 />
@@ -266,13 +266,13 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <Statistic
                   title="Отправитель"
-                  value={senderStats.sender}
+                  value={senderStats.sender.toLocaleString('ru-RU')}
                   prefix={<UserOutlined />}
                   valueStyle={{ color: COLORS[0] }}
                 />
                 <Statistic
                   title="Спаммер"
-                  value={senderStats.spammer}
+                  value={senderStats.spammer.toLocaleString('ru-RU')}
                   prefix={<TeamOutlined />}
                   valueStyle={{ color: COLORS[1] }}
                 />

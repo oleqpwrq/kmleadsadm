@@ -5,87 +5,121 @@ import { Button, Table, Space, Select, Pagination, Input, Modal, message, Tag } 
 import { ArrowLeftOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import Sidebar from '@/components/Sidebar';
 import { useRouter } from 'next/navigation';
+import { Account } from '@/types/account';
+import { getAccounts, deleteAccount } from '@/utils/accountStorage';
 
-interface OpinionValidation {
+interface Account {
   id: number;
-  date: string;
-  eventId: number;
-  category: string;
   username: string;
+  type: 'Universal' | 'Sender' | 'Spammer';
+  name: string;
+  tgApiId: string;
   userid: string;
-  chatLink: string;
-  msgText: string;
-  result: 'positive' | 'neutral' | 'negative';
+  tgPhone: string;
+  node: string;
+  chatsType: string;
+  chatsGoal: string;
+  tgApiHash: string;
+  tgApiSession: string;
+  needToJoinChats: boolean;
+  chatsCount: number;
 }
 
-const categories = [
-  'Анализ', 'Кроссы', 'Маркетинг', 'Ликвидация', 'Регистрация', 'Бухгалтерия', 'Налоги', 'УК', 'it', 'Кредиты', 'Усадьба', 'Лыжи', 'Приемная', 'Недвижимость', 'Полис ОМС', 'Автоподбор', 'Beer is like wine', 'Гильзовка (ГБЦ)', 'БФЛ - Банкротство', 'Техбаза', 'Парсер', 'Сантехника', 'Пилатес', 'Институт', 'Детский лагерь', 'Охрана', 'Заграничные карты (Алексей)', 'Строительство Коттеджей', 'Телемаркетинг', 'The Zal', 'Лидерландия', 'Кэмпы Ростов',
-];
-const results = [
-  { value: 'positive', label: 'positive' },
-  { value: 'neutral', label: 'neutral' },
-  { value: 'negative', label: 'negative' },
-];
-
 // Генерация данных для примера
-const generateData = (): OpinionValidation[] => {
-  return Array.from({ length: 12743 }, (_, i) => {
+const generateData = (): Account[] => {
+  const types: ('Universal' | 'Sender' | 'Spammer')[] = ['Universal', 'Sender', 'Spammer'];
+  const nodes = [
+    '1 45.8.99.233',
+    '2 188.225.79.45',
+    '3 195.58.37.235',
+    '4 92.118.113.92'
+  ];
+  
+  return Array.from({ length: 202 }, (_, i) => {
     const id = i + 1;
     return {
       id,
-      date: new Date(Date.now() - (i * 10000000)).toLocaleString('ru-RU'),
-      eventId: 1000 + id,
-      category: categories[Math.floor(Math.random() * categories.length)],
-      username: Math.random() > 0.3 ? `user${id}` : 'Юзернейма нет',
-      userid: (100000000 + id).toString(),
-      chatLink: `https://t.me/chat${id}/msg${id}`,
-      msgText: `Текст сообщения #${id} ...`,
-      result: ['positive', 'neutral', 'negative'][Math.floor(Math.random() * 3)] as 'positive' | 'neutral' | 'negative',
+      username: `user${id}`,
+      type: types[Math.floor(Math.random() * types.length)],
+      name: `Пользователь ${id}`,
+      tgApiId: Math.floor(Math.random() * 100000000).toString(),
+      userid: Math.floor(Math.random() * 10000000000).toString(),
+      tgPhone: `79${Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')}`,
+      node: nodes[Math.floor(Math.random() * nodes.length)],
+      chatsType: 'None',
+      chatsGoal: '-',
+      tgApiHash: '',
+      tgApiSession: '',
+      needToJoinChats: false,
+      chatsCount: 500
     };
   });
 };
 
-export default function OpinionValidationPage() {
+export default function AccountsPage() {
   const router = useRouter();
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [allData, setAllData] = useState<OpinionValidation[]>([]);
-  const [filteredData, setFilteredData] = useState<OpinionValidation[]>([]);
-  const [displayData, setDisplayData] = useState<OpinionValidation[]>([]);
+  const [allData, setAllData] = useState<Account[]>([]);
+  const [filteredData, setFilteredData] = useState<Account[]>([]);
+  const [displayData, setDisplayData] = useState<Account[]>([]);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const [filterCategory, setFilterCategory] = useState<string | undefined>(undefined);
-  const [filterResult, setFilterResult] = useState<string | undefined>(undefined);
+  const [filterType, setFilterType] = useState<string | undefined>(undefined);
   const [filterText, setFilterText] = useState('');
-  const pageSize = 10;
+  const pageSize = 100;
+
+  // Функция обновления данных
+  const updateData = () => {
+    const accounts = getAccounts();
+    if (accounts.length === 0) {
+      const generatedData = generateData();
+      localStorage.setItem('accountsData', JSON.stringify(generatedData));
+      setAllData(generatedData);
+      setFilteredData(generatedData);
+    } else {
+      setAllData(accounts);
+      setFilteredData(accounts);
+    }
+  };
 
   // Инициализация данных
   useEffect(() => {
-    const data = generateData();
-    setAllData(data);
-    setFilteredData(data);
+    updateData();
+
+    // Слушаем событие storage для обновления данных
+    const handleStorageChange = () => {
+      updateData();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('accountsUpdate', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('accountsUpdate', handleStorageChange);
+    };
   }, []);
 
   // Применение фильтров
   useEffect(() => {
     let filtered = [...allData];
     
-    if (filterCategory) {
-      filtered = filtered.filter(item => item.category === filterCategory);
-    }
-    if (filterResult) {
-      filtered = filtered.filter(item => item.result === filterResult);
+    if (filterType) {
+      filtered = filtered.filter(item => item.type === filterType);
     }
     if (filterText) {
       filtered = filtered.filter(item => 
-        item.msgText.toLowerCase().includes(filterText.toLowerCase()) ||
         item.username.toLowerCase().includes(filterText.toLowerCase()) ||
-        item.userid.toLowerCase().includes(filterText.toLowerCase())
+        item.name.toLowerCase().includes(filterText.toLowerCase()) ||
+        item.tgApiId.toLowerCase().includes(filterText.toLowerCase()) ||
+        item.userid.toLowerCase().includes(filterText.toLowerCase()) ||
+        item.tgPhone.toLowerCase().includes(filterText.toLowerCase())
       );
     }
     
     setFilteredData(filtered);
-    setCurrentPage(1); // Сбрасываем на первую страницу при изменении фильтров
-  }, [allData, filterCategory, filterResult, filterText]);
+    setCurrentPage(1);
+  }, [allData, filterType, filterText]);
 
   // Пагинация
   useEffect(() => {
@@ -94,71 +128,80 @@ export default function OpinionValidationPage() {
     setDisplayData(filteredData.slice(start, end));
   }, [currentPage, filteredData]);
 
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'Universal':
+        return 'blue';
+      case 'Sender':
+        return 'green';
+      case 'Spammer':
+        return 'red';
+      default:
+        return 'default';
+    }
+  };
+
   const columns = [
     {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
       width: 60,
-      render: (id: number) => <a href={`/admin/management/opinionvalidation/${id}`}>{id}</a>,
+      render: (id: number) => <a href={`/admin/management/accounts/${id}`}>{id}</a>,
     },
     {
-      title: 'Дата',
-      dataIndex: 'date',
-      key: 'date',
-      width: 140,
-    },
-    {
-      title: 'TgParserEvent ID',
-      dataIndex: 'eventId',
-      key: 'eventId',
-      width: 120,
-    },
-    {
-      title: 'Категория',
-      dataIndex: 'category',
-      key: 'category',
-      width: 120,
-    },
-    {
-      title: 'TG Username',
+      title: 'Username',
       dataIndex: 'username',
       key: 'username',
       width: 120,
+      render: (username: string, record: Account) => (
+        <a href={`/admin/management/accounts/${record.id}`}>{username}</a>
+      ),
     },
     {
-      title: 'TG Userid',
+      title: 'Method',
+      dataIndex: 'type',
+      key: 'type',
+      width: 120,
+      render: (type: string) => (
+        <Tag color={getTypeColor(type)}>{type}</Tag>
+      ),
+    },
+    {
+      title: 'Имя',
+      dataIndex: 'name',
+      key: 'name',
+      width: 150,
+    },
+    {
+      title: 'Tg api id',
+      dataIndex: 'tgApiId',
+      key: 'tgApiId',
+      width: 120,
+    },
+    {
+      title: 'Userid',
       dataIndex: 'userid',
       key: 'userid',
       width: 120,
     },
     {
-      title: 'TG ChatMsgLink',
-      dataIndex: 'chatLink',
-      key: 'chatLink',
-      width: 180,
-      render: (text: string) => <a href={text} target="_blank" rel="noopener noreferrer">{text}</a>,
-    },
-    {
-      title: 'Текст сообщения',
-      dataIndex: 'msgText',
-      key: 'msgText',
-      ellipsis: true,
-    },
-    {
-      title: 'Validation result',
-      dataIndex: 'result',
-      key: 'result',
+      title: 'Tg phone',
+      dataIndex: 'tgPhone',
+      key: 'tgPhone',
       width: 120,
-      render: (result: string) => (
-        <Tag color={result === 'positive' ? 'green' : result === 'neutral' ? 'gold' : 'red'}>{result}</Tag>
-      ),
+    },
+    {
+      title: 'Node',
+      dataIndex: 'node',
+      key: 'node',
+      width: 150,
     },
     {
       title: 'Действия',
       key: 'actions',
       width: 80,
-      render: (_: any, record: OpinionValidation) => (
+      render: (_: any, record: Account) => (
         <Button
           type="text"
           danger
@@ -181,29 +224,37 @@ export default function OpinionValidationPage() {
   };
 
   const handleDeleteConfirm = () => {
-    const newAllData = allData.filter(item => !selectedRowKeys.includes(item.id));
-    setAllData(newAllData);
+    selectedRowKeys.forEach(key => {
+      deleteAccount(Number(key));
+    });
+    
+    const accounts = getAccounts();
+    setAllData(accounts);
+    setFilteredData(accounts);
     setSelectedRowKeys([]);
     setIsDeleteModalVisible(false);
-    message.success('Выбранные результаты удалены');
+    message.success('Выбранные аккаунты удалены');
   };
 
-  const handleDeleteSingle = (record: OpinionValidation) => {
+  const handleDeleteSingle = (record: Account) => {
     Modal.confirm({
-      title: 'Удалить результат?',
-      content: `Вы уверены, что хотите удалить результат #${record.id}?`,
+      title: 'Удалить аккаунт?',
+      content: `Вы уверены, что хотите удалить аккаунт #${record.id}?`,
       okText: 'Удалить',
       okType: 'danger',
       cancelText: 'Отмена',
       onOk: () => {
-        setAllData(allData.filter(item => item.id !== record.id));
-        message.success('Результат удалён');
+        deleteAccount(record.id);
+        const accounts = getAccounts();
+        setAllData(accounts);
+        setFilteredData(accounts);
+        message.success('Аккаунт удален');
       },
     });
   };
 
   const handleAdd = () => {
-    router.push('/admin/management/opinionvalidation/add');
+    router.push('/admin/management/accounts/add');
   };
 
   return (
@@ -215,13 +266,13 @@ export default function OpinionValidationPage() {
         <div className="max-w-[calc(100vw-20rem)]">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Результаты валидации мнений</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Аккаунты</h1>
               <div className="text-sm text-gray-500 mt-1">
                 <a href="/admin" className="hover:text-gray-700">Главная</a>
                 &nbsp;&rsaquo;&nbsp;
                 <a href="/admin/management" className="hover:text-gray-700">Управление</a>
                 &nbsp;&rsaquo;&nbsp;
-                <span className="text-gray-600">Результаты валидации мнений</span>
+                <span className="text-gray-600">Аккаунты</span>
               </div>
             </div>
             <div className="flex gap-4">
@@ -230,7 +281,7 @@ export default function OpinionValidationPage() {
                 icon={<PlusOutlined />}
                 onClick={handleAdd}
               >
-                Добавить результат
+                Добавить аккаунт
               </Button>
               <Button 
                 type="primary"
@@ -245,33 +296,26 @@ export default function OpinionValidationPage() {
           {/* Фильтры */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
             <div className="font-semibold mb-4 text-gray-900">Фильтр</div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <div className="text-xs text-gray-500 mb-1">Категория</div>
+                <div className="text-xs text-gray-500 mb-1">Тип</div>
                 <Select
                   allowClear
                   style={{ width: '100%' }}
-                  placeholder="Все категории"
-                  options={categories.map(c => ({ value: c, label: c }))}
-                  value={filterCategory}
-                  onChange={setFilterCategory}
+                  placeholder="Все типы"
+                  options={[
+                    { value: 'Universal', label: 'Universal' },
+                    { value: 'Sender', label: 'Sender' },
+                    { value: 'Spammer', label: 'Spammer' },
+                  ]}
+                  value={filterType}
+                  onChange={setFilterType}
                 />
               </div>
               <div>
-                <div className="text-xs text-gray-500 mb-1">Результат</div>
-                <Select
-                  allowClear
-                  style={{ width: '100%' }}
-                  placeholder="Все результаты"
-                  options={results}
-                  value={filterResult}
-                  onChange={setFilterResult}
-                />
-              </div>
-              <div>
-                <div className="text-xs text-gray-500 mb-1">Поиск по тексту</div>
+                <div className="text-xs text-gray-500 mb-1">Поиск</div>
                 <Input
-                  placeholder="Текст сообщения..."
+                  placeholder="Поиск по username, имени, ID или телефону..."
                   value={filterText}
                   onChange={e => setFilterText(e.target.value)}
                   allowClear
@@ -282,8 +326,7 @@ export default function OpinionValidationPage() {
               <Button
                 type="default"
                 onClick={() => {
-                  setFilterCategory(undefined);
-                  setFilterResult(undefined);
+                  setFilterType(undefined);
                   setFilterText('');
                 }}
               >
@@ -337,7 +380,7 @@ export default function OpinionValidationPage() {
 
             <div className="p-4 border-t flex justify-between items-center">
               <span className="text-gray-500">
-                {filteredData.length} результатов валидации
+                {filteredData.length} аккаунтов
               </span>
               <Pagination
                 current={currentPage}
@@ -354,7 +397,7 @@ export default function OpinionValidationPage() {
       </main>
 
       <Modal
-        title="Удалить выбранные результаты?"
+        title="Удалить выбранные аккаунты?"
         open={isDeleteModalVisible}
         onOk={handleDeleteConfirm}
         onCancel={() => setIsDeleteModalVisible(false)}
@@ -362,7 +405,7 @@ export default function OpinionValidationPage() {
         cancelText="Отмена"
         okType="danger"
       >
-        <p>Вы уверены, что хотите удалить выбранные результаты?</p>
+        <p>Вы уверены, что хотите удалить выбранные аккаунты?</p>
         <p className="text-gray-500 text-sm mt-2">
           Будет удалено: {selectedRowKeys.length}
         </p>

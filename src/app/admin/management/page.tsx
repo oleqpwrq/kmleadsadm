@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { Button, Space } from 'antd';
+import { Button } from 'antd';
 import { 
-  PlusOutlined, 
   EditOutlined,
   MessageOutlined,
   CommentOutlined,
@@ -17,27 +16,30 @@ import {
   FilterOutlined,
   FileTextOutlined
 } from '@ant-design/icons';
+import { useRouter } from 'next/navigation';
 
 interface ManagementItem {
   id: string;
   title: string;
   icon: React.ReactNode;
+  path: string;
 }
 
 export default function ManagementPage() {
+  const router = useRouter();
   const [items] = useState<ManagementItem[]>([
-    { id: 'chat-errors', title: 'Ошибки отправки сообщений в чатах', icon: <CloseCircleOutlined className="text-red-500" /> },
-    { id: 'chat-messages', title: 'Сообщения в чатах', icon: <MessageOutlined className="text-blue-500" /> },
-    { id: 'opinion-validation', title: 'Результаты валидации мнений', icon: <CheckCircleOutlined className="text-green-500" /> },
-    { id: 'success-messages', title: 'Успешные сообщения', icon: <CheckCircleOutlined className="text-green-500" /> },
-    { id: 'user-errors', title: 'Ошибки отправки сообщений пользователей', icon: <CloseCircleOutlined className="text-red-500" /> },
-    { id: 'user-messages', title: 'Сообщения пользователей', icon: <CommentOutlined className="text-blue-500" /> },
-    { id: 'accounts', title: 'Аккаунты', icon: <UserOutlined className="text-purple-500" /> },
-    { id: 'bots', title: 'Боты', icon: <RobotOutlined className="text-orange-500" /> },
-    { id: 'blocked-users', title: 'Заблокированные пользователи', icon: <StopOutlined className="text-red-500" /> },
-    { id: 'categories', title: 'Категории', icon: <AppstoreOutlined className="text-green-500" /> },
-    { id: 'minus-words', title: 'Минус слова', icon: <FilterOutlined className="text-orange-500" /> },
-    { id: 'templates', title: 'Шаблонные сообщения', icon: <FileTextOutlined className="text-blue-500" /> },
+    { id: 'chat-errors', title: 'Ошибки отправки сообщений в чатах', icon: <CloseCircleOutlined className="text-red-500" />, path: '/admin/management/chaterrors' },
+    { id: 'chat-messages', title: 'Сообщения в чатах', icon: <MessageOutlined className="text-blue-500" />, path: '/admin/management/chatmessages' },
+    { id: 'opinion-validation', title: 'Результаты валидации мнений', icon: <CheckCircleOutlined className="text-green-500" />, path: '/admin/management/opinionvalidation' },
+    { id: 'success-messages', title: 'Успешные сообщения', icon: <CheckCircleOutlined className="text-green-500" />, path: '/admin/management/successmessages' },
+    { id: 'user-errors', title: 'Ошибки отправки сообщений пользователей', icon: <CloseCircleOutlined className="text-red-500" />, path: '/admin/management/usererrors' },
+    { id: 'user-messages', title: 'Сообщения пользователей', icon: <CommentOutlined className="text-blue-500" />, path: '/admin/management/usermessages' },
+    { id: 'accounts', title: 'Аккаунты', icon: <UserOutlined className="text-purple-500" />, path: '/admin/management/accounts' },
+    { id: 'bots', title: 'Боты', icon: <RobotOutlined className="text-orange-500" />, path: '/admin/management/bots' },
+    { id: 'blocked-users', title: 'Заблокированные пользователи', icon: <StopOutlined className="text-red-500" />, path: '/admin/management/blockedusers' },
+    { id: 'categories', title: 'Категории', icon: <AppstoreOutlined className="text-green-500" />, path: '/admin/management/categories' },
+    { id: 'minus-words', title: 'Минус слова', icon: <FilterOutlined className="text-orange-500" />, path: '/admin/management/minuswords' },
+    { id: 'templates', title: 'Шаблонные сообщения', icon: <FileTextOutlined className="text-blue-500" />, path: '/admin/management/templates' },
   ]);
 
   return (
@@ -55,21 +57,13 @@ export default function ManagementPage() {
                   {item.icon}
                   <span className="text-gray-900">{item.title}</span>
                 </div>
-                <Space>
-                  <Button 
-                    type="primary" 
-                    icon={<PlusOutlined />}
-                    onClick={() => console.log('Add', item.id)}
-                  >
-                    Добавить
-                  </Button>
-                  <Button 
-                    icon={<EditOutlined />}
-                    onClick={() => console.log('Edit', item.id)}
-                  >
-                    Изменить
-                  </Button>
-                </Space>
+                <Button 
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => router.push(item.path)}
+                >
+                  Настройка и управление
+                </Button>
               </div>
             ))}
           </div>
